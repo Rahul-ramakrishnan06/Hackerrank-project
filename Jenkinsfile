@@ -6,7 +6,7 @@ pipeline {
 		stage('Build'){
 			steps{
 				script{
-                    sh 'sudo docker-compose build web'
+                    sh 'docker-compose build web'
 				}
 			}
 		}
@@ -20,7 +20,7 @@ pipeline {
 		stage('Docker Compose'){
 			steps{
 				script{
-                    echo "Scan.."
+                    sh 'docker-compose up web'
 				}
 			}
 		}
