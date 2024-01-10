@@ -1,10 +1,10 @@
 pipeline {
 	agent{
-        label 'nodejs'
+        label 'kmaster'
 	}
 
     environment {
-        DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
+        DOCKER_IMAGE = 'nodejs-multi_version-10_web:2'
     }
 	stages{
 		stage('Build'){
@@ -14,47 +14,19 @@ pipeline {
 				}
 			}
 		}
-		stage('SonarQube Scan'){
+
+		stage('sed command'){
 			steps{
 				script{
-					echo "Scan.."
+                    sh 'sed -i "s|image:.*|image: ${DOCKER_IMAGE}|" nodejs.yaml'
 				}
 			}
 		}
 
-        stage('Scan for Vulnerabilities') {
-            steps {
-                script {
-                    def trivyScan = sh(script: "trivy --severity HIGH,CRITICAL ${DOCKER_IMAGE}", returnStatus: true)
-
-                    if (trivyScan != 0) {
-                        error("Vulnerabilities found in the Docker image. Build aborted.")
-                    } 
-                    else {
-                        echo "No HIGH or CRITICAL vulnerabilities found. Proceeding with the build."
-                    }
-                }
-            }
-        }
-/*		stage("Quality Gate"){
+		stage('sed command'){
 			steps{
 				script{
-					echo "Scan.."
-					#FAILED_STAGE = env.STAGE_NAME
-					#timeout(time: 5, unit: 'MINUTES') {
-					#	def qg = waitForQualityGate()
-					#	if (qg.status != 'OK') {
-					#		error "Pipeline aborted due to quality gate failure: ${qg.status}"
-						}
-					}
-				}
-			}
-		}
-*/
-		stage('Docker Compose'){
-			steps{
-				script{
-                    sh 'docker-compose up web'
+                    sh 'kubectl apply -f nodejs.yaml'
 				}
 			}
 		}
