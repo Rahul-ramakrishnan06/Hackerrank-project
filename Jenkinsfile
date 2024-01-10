@@ -1,10 +1,10 @@
 pipeline {
 	agent{
-        label 'kmaster'
+        label 'nodejs'
 	}
 
     environment {
-        DOCKER_IMAGE = 'nodejs-multi_version-10_web:2'
+        DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
     }
 	stages{
 		stage('Build'){
@@ -14,19 +14,31 @@ pipeline {
 				}
 			}
 		}
-
-		stage('sed command'){
+		stage('SonarQube Scan'){
 			steps{
 				script{
-                    sh 'sed -i "s|image:.*|image: ${DOCKER_IMAGE}|" nodejs.yaml'
+					echo "Scan.."
 				}
 			}
 		}
+		stage('Sonarqube') {
+    		environment {
+        		scannerHome = tool 'SonarQubeScanner'
+    		}
+    		steps {
+        		withSonarQubeEnv('sonarqube') {
+            		sh "${scannerHome}/bin/sonar-scanner"
+        		}
+        		timeout(time: 10, unit: 'MINUTES') {
+            		waitForQualityGate abortPipeline: true
+        		}
+    		}
+		}
 
-		stage('sed command'){
+		stage('Docker Compose'){
 			steps{
 				script{
-                    sh 'kubectl apply -f nodejs.yaml'
+                    sh 'docker-compose up web'
 				}
 			}
 		}
