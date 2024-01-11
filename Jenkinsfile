@@ -2,6 +2,10 @@ pipeline {
 	agent{
         label 'nodejs'
 	}
+	tools {
+        nodejs 'Node.js'
+    }
+
 
     environment {
         DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
