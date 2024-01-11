@@ -5,37 +5,33 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
+		SONARQUBE_HOME = tool 'SonarQubeScanner'
     }
 	stages{
-		stage('Build'){
-			steps{
-				script{
-                    sh 'docker-compose build web'
-				}
-			}
-		}
-		stage('Build and SonarQube Scan') {
+		stage('Install Dependencies') {
             steps {
                 script {
-                    // Install Node.js and npm (if not installed globally)
-                    tool name: 'Node.js', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    
-                    // Install project dependencies
+                    // Install Node.js dependencies
                     sh 'npm install'
-                    
-                    // Run SonarQube scanner
-                    sh "${SONARQUBE_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=Nodejs \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://52.91.148.253:9000 \
-                        -Dsonar.login=sqa_c87013ba4b1438f886ec6d049de6dc74c0cbd1b4"
                 }
             }
         }
-		stage('Docker Compose'){
+
+		stage('Build and SonarQube Scan') {
+            steps {
+                script {
+                    sh "${SONARQUBE_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=Nodejs \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://52.91.148.253:9000
+                        -Dsonar.login=sqa_8ffb79811d285200424245cfa07e74d61bd80e03"
+                }
+            }
+        }
+		stage('Build'){
 			steps{
 				script{
-                    sh 'docker-compose up web'
+                    sh 'npm run build'
 				}
 			}
 		}
