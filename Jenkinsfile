@@ -17,9 +17,6 @@ pipeline {
 		stage('Build and SonarQube Scan') {
             steps {
                 script {
-                    // Install Node.js and npm (if not installed globally)
-                    sh 'npm install'
-                    
                     // Run SonarQube scanner
                     sh "${SONARQUBE_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=Nodejs \
