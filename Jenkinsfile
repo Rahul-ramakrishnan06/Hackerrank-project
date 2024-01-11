@@ -14,27 +14,24 @@ pipeline {
 				}
 			}
 		}
-		stage('SonarQube Scan'){
-			steps{
-				script{
-					echo "Scan.."
-				}
-			}
-		}
-		stage('Sonarqube') {
-    		environment {
-        		scannerHome = tool 'SonarQubeScanner'
-    		}
-    		steps {
-        		withSonarQubeEnv('sonarqube') {
-            		sh "${scannerHome}/bin/sonar-scanner"
-        		}
-        		timeout(time: 10, unit: 'MINUTES') {
-            		waitForQualityGate abortPipeline: true
-        		}
-    		}
-		}
-
+		stage('Build and SonarQube Scan') {
+            steps {
+                script {
+                    // Install Node.js and npm (if not installed globally)
+                    tool name: 'Node.js', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
+                    
+                    // Install project dependencies
+                    sh 'npm install'
+                    
+                    // Run SonarQube scanner
+                    sh "${SONARQUBE_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=Nodejs \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=http://52.91.148.253:9000 \
+                        -Dsonar.login=sqa_c87013ba4b1438f886ec6d049de6dc74c0cbd1b4"
+                }
+            }
+        }
 		stage('Docker Compose'){
 			steps{
 				script{
