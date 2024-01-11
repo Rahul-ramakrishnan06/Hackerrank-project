@@ -1,12 +1,12 @@
 pipeline {
     agent{
-        label 'nodejs'
+        label 'master'
 	}
 
     environment {
         // Set your Docker Hub credentials
-        DOCKER_HUB_USERNAME = credentials('rahulkarthi54321	')
-        DOCKER_HUB_PASSWORD = credentials('rahul@123')
+        DOCKER_HUB_USERNAME = credentials('docker-hub-username')
+        DOCKER_HUB_PASSWORD = credentials('docker-hub-password')
         
         // Set your Docker image details
         DOCKER_IMAGE_NAME = 'rahulkarthi54321/nodejsdockerimage'
@@ -23,6 +23,16 @@ pipeline {
 			}
 		}
 
+		stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        def customImage = docker.build("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
+                    }
+                }
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
                 script {
@@ -32,6 +42,14 @@ pipeline {
                 }
             }
         }
+
+		stage('Build'){
+			steps{
+				script{
+                    sh 'kubectl apply -f deployment.yaml'
+				}
+			}
+		}
     }
 }
 
