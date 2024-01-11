@@ -23,7 +23,7 @@ pipeline {
                     sh "${SONARQUBE_HOME}/bin/sonar-scanner \
                         -Dsonar.projectKey=Nodejs \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=http://52.91.148.253:9000
+                        -Dsonar.host.url=http://52.91.148.253:9000 \
                         -Dsonar.login=sqa_8ffb79811d285200424245cfa07e74d61bd80e03"
                 }
             }
