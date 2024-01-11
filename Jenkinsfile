@@ -43,7 +43,7 @@ pipeline {
             }
         }
 
-		stage('Build'){
+		stage('Deployment K8'){
 			steps{
 				script{
                     sh 'kubectl apply -f deployment.yaml'
