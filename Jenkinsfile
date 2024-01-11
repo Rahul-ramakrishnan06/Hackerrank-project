@@ -5,6 +5,7 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
+	SONARQUBE_HOME = tool 'SonarQubeScanner'
     }
 	stages{
 		stage('Build'){
