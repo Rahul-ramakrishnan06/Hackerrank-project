@@ -1,43 +1,37 @@
 pipeline {
-	agent{
+    agent{
         label 'nodejs'
 	}
-	tools {
-        nodejs 'Node.js'
-    }
-
 
     environment {
-        DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
-		SONARQUBE_HOME = tool 'SonarQubeScanner'
+        // Set your Docker Hub credentials
+        DOCKER_HUB_USERNAME = credentials('rahulkarthi54321	')
+        DOCKER_HUB_PASSWORD = credentials('rahul@123')
+        
+        // Set your Docker image details
+        DOCKER_IMAGE_NAME = 'rahulkarthi54321/nodejsdockerimage'
+        DOCKER_IMAGE_TAG = 'latest'
     }
-	stages{
-		stage('Install Dependencies') {
-            steps {
-                script {
-                    // Install Node.js dependencies
-                    sh 'npm install'
-                }
-            }
-        }
 
-		stage('Build and SonarQube Scan') {
-            steps {
-                script {
-                    sh "${SONARQUBE_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=Nodejs \
-                        -Dsonar.sources=. \
-                        -Dsonar.host.url=http://52.91.148.253:9000 \
-                        -Dsonar.login=sqa_8ffb79811d285200424245cfa07e74d61bd80e03"
-                }
-            }
-        }
+    stages {
+
 		stage('Build'){
 			steps{
 				script{
-                    sh 'node app.js'
+                    sh 'docker-compose build web'
 				}
 			}
 		}
-	}
+
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
+                        docker.image("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}").push()
+                    }
+                }
+            }
+        }
+    }
 }
+
