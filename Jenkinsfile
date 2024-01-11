@@ -18,9 +18,6 @@ pipeline {
             steps {
                 script {
                     // Install Node.js and npm (if not installed globally)
-                    tool name: 'Node.js', type: 'jenkins.plugins.nodejs.tools.NodeJSInstallation'
-                    
-                    // Install project dependencies
                     sh 'npm install'
                     
                     // Run SonarQube scanner
