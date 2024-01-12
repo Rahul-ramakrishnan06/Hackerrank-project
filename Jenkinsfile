@@ -1,55 +1,31 @@
 pipeline {
-    agent{
-        label 'master'
+	agent{
+        label 'nodejs'
 	}
 
-    environment {
-        // Set your Docker Hub credentials
-        DOCKER_HUB_USERNAME = credentials('docker-hub-username')
-        DOCKER_HUB_PASSWORD = credentials('docker-hub-password')
-        
-        // Set your Docker image details
-        DOCKER_IMAGE_NAME = 'rahulkarthi54321/nodejsdockerimage'
-        DOCKER_IMAGE_TAG = 'latest'
+	tools {
+        nodejs 'Node.js'
     }
 
-    stages {
+    environment {
+        DOCKER_IMAGE = 'nodejs-multi_version-10_web:latest'
+		SONARQUBE_HOME = tool 'SonarQubeScanner'
+    }
+	stages{
+		stage('Install Dependencies') {
+            steps {
+                script {
+                    sh 'npm install'
+                }
+            }
+        }
 
 		stage('Build'){
 			steps{
 				script{
-                    sh 'docker-compose build web'
+                    sh 'node app.js'
 				}
 			}
 		}
-
-		stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        def customImage = docker.build("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}")
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'docker-hub-credentials') {
-                        docker.image("${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}").push()
-                    }
-                }
-            }
-        }
-
-		stage('Deployment K8'){
-			steps{
-				script{
-                    sh 'kubectl apply -f deployment.yaml'
-				}
-			}
-		}
-    }
+	}
 }
-
